@@ -16,21 +16,6 @@ import java.io.Serializable;
 public class Table implements Serializable {
 
     /**
-     * 把数据库小写字母+_的命名方式改为首字母大写的驼峰命名
-     *
-     * @param name name
-     * @return jdbcName
-     */
-    public static String dbNameToJdbcName(String name) {
-        //先驼峰
-        name = Column.dbNameToJdbcName(name);
-        //再把第一个大写
-        String firstChar = String.valueOf(name.charAt(0)).toUpperCase();
-
-        return firstChar + name.substring(1);
-    }
-
-    /**
      * 表名
      */
     private String name;
@@ -43,12 +28,4 @@ public class Table implements Serializable {
      */
     private String comment;
 
-    /**
-     * JDBC的表名
-     *
-     * @param name 表名
-     */
-    public void setJdbcName(String name) {
-        this.jdbcName = dbNameToJdbcName(name);
-    }
 }

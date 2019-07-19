@@ -1,10 +1,6 @@
 package mysql.export;
 
-import mysql.info.Column;
-import mysql.info.Table;
-
 import java.io.IOException;
-import java.util.List;
 
 /**
  * <p>项目名称: MybatisGenerator
@@ -16,6 +12,13 @@ import java.util.List;
  **/
 public interface Export {
 
-    void export(String dirPath, Table table, List<Column> columnList) throws IOException;
+    /**
+     * 导出文件
+     *
+     * @param dirPath    文件导出目录
+     * @param exportInfo 导出信息
+     * @throws IOException IOException
+     */
+    void export(String dirPath, ExportInfo exportInfo) throws IOException;
 
 }

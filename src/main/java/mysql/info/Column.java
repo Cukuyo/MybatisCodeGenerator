@@ -1,7 +1,6 @@
 package mysql.info;
 
 import lombok.Data;
-import mysql.JdbcTypeSearch;
 
 import java.io.Serializable;
 
@@ -19,31 +18,6 @@ public class Column implements Serializable {
      * 主键KEY值
      */
     public static final String KEY_PRIMARY = "PRI";
-
-    /**
-     * 把数据库小写字母+_的命名方式改为驼峰命名
-     *
-     * @param name name
-     * @return jdbcName
-     */
-    public static String dbNameToJdbcName(String name) {
-        char[] nameCharArr = name.toCharArray();
-        StringBuilder builder = new StringBuilder(nameCharArr.length);
-        boolean isChange = false;
-        for (char c : nameCharArr) {
-            if (isChange) {
-                builder.append(String.valueOf(c).toUpperCase());
-                isChange = false;
-            } else {
-                if (c == '_') {
-                    isChange = true;
-                } else {
-                    builder.append(c);
-                }
-            }
-        }
-        return builder.toString();
-    }
 
 
     /**
@@ -75,15 +49,4 @@ public class Column implements Serializable {
      */
     private String comment;
 
-
-    /**
-     * @param name 数据库小写字母+_命名方式的名字
-     */
-    public void setJdbcName(String name) {
-        this.jdbcName = dbNameToJdbcName(name);
-    }
-
-    public void setJdbcType(String dateType, String columnType) {
-        this.jdbcType = JdbcTypeSearch.search(dateType, columnType);
-    }
 }

@@ -2,6 +2,8 @@ package mysql;
 
 import mysql.info.Column;
 import mysql.info.Table;
+import mysql.util.JdbcTypeSearch;
+import mysql.util.StringUtils;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -29,13 +31,13 @@ public class MysqlDb {
     private String ip;
     private String port;
     private String user;
-    private String passwd;
+    private String password;
 
-    public MysqlDb(String ip, String port, String user, String passwd) {
+    public MysqlDb(String ip, String port, String user, String password) {
         this.ip = ip;
         this.port = port;
         this.user = user;
-        this.passwd = passwd;
+        this.password = password;
     }
 
     public void connect() throws SQLException {
@@ -52,7 +54,7 @@ public class MysqlDb {
 //        }
 
         String url = "jdbc:mysql://" + ip + ":" + port;
-        connection = DriverManager.getConnection(url, user, passwd);
+        connection = DriverManager.getConnection(url, user, password);
         statement = connection.createStatement();
     }
 
@@ -63,9 +65,9 @@ public class MysqlDb {
 
     public List<String> getDatabases() throws SQLException {
         ResultSet resultSet = statement.executeQuery("SELECT SCHEMA_NAME FROM information_schema.SCHEMATA");
-        List<String> dbNameList = new LinkedList<String>();
+        List<String> dbNameList = new LinkedList<>();
         while (resultSet.next()) {
-            dbNameList.add(resultSet.getString(1));
+            dbNameList.add(resultSet.getString("SCHEMA_NAME"));
         }
         resultSet.close();
         return dbNameList;
@@ -76,12 +78,14 @@ public class MysqlDb {
                 "SELECT TABLE_NAME,TABLE_COMMENT " +
                         "FROM information_schema.TABLES " +
                         "WHERE TABLE_SCHEMA=" + '\'' + dbName + '\'');
-        List<Table> tableList = new LinkedList<Table>();
+        List<Table> tableList = new LinkedList<>();
         while (resultSet.next()) {
             Table table = new Table();
-            String name = resultSet.getString("TABLE_NAME");
-            table.setName(name);
-            table.setJdbcName(name);
+
+            String tableName = resultSet.getString("TABLE_NAME");
+
+            table.setName(tableName);
+            table.setJdbcName(StringUtils.dbNameToUpperCaseHump(tableName));
             table.setComment(resultSet.getString("TABLE_COMMENT"));
             tableList.add(table);
         }
@@ -99,15 +103,14 @@ public class MysqlDb {
             Column column = new Column();
 
             String columnName = resultSet.getString("COLUMN_NAME");
-            column.setName(columnName);
-            column.setJdbcName(columnName);
-
             String dateType = resultSet.getString("DATA_TYPE");
             String columnType = resultSet.getString("COLUMN_TYPE");
+
+            column.setName(columnName);
+            column.setJdbcName(StringUtils.dbNameToLowerCaseHump(columnName));
             column.setDataType(dateType);
             column.setColumnType(columnType);
-            column.setJdbcType(dateType, columnType);
-
+            column.setJdbcType(JdbcTypeSearch.search(dateType, columnType));
             column.setKey(resultSet.getString("COLUMN_KEY"));
             column.setComment(resultSet.getString("COLUMN_COMMENT"));
 
@@ -116,4 +119,6 @@ public class MysqlDb {
         resultSet.close();
         return columnList;
     }
+
+
 }
