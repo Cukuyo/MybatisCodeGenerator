@@ -3,7 +3,7 @@
 
 （由于IDEA的Mybatis Plus插件越做越差，索性自己写了一个）
 
-本工程的技术博客请移步：
+本工程的技术博客请移步：https://blog.csdn.net/ONS_cukuyo/article/details/96482688
 
 使用用法：java -jar mybatisCodeGenerator.jar 或者在IDE里运行
 
