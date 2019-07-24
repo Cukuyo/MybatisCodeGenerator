@@ -70,6 +70,8 @@ public class ExportDaoMapper implements Export, DaoFunction {
         listSelective(table, columnList, writer);
         //选择性count
         countSelective(table, columnList, writer);
+        //根据主键批量删除
+        batchDeleteByPrimaryKeyList(table, columnList, writer);
 
         //结尾
         writer.write("</mapper>");
@@ -87,6 +89,20 @@ public class ExportDaoMapper implements Export, DaoFunction {
         writer.write("\t\t</where>\n");
         writer.write("\t</select>\n");
         writer.write("\n");
+    }
+
+    @Override
+    public void batchDeleteByPrimaryKeyList(Table table, List<Column> columnList, Writer writer) throws IOException {
+        if (priColumn != null) {
+            writer.write("\t<!--根据主键批量删除-->\n");
+            writer.write("\t<delete id=\"batchDeleteByPrimaryKeyList\">\n");
+            writer.write("\t\tdelete from "+table.getName()+" where "+priColumn.getName()+" in\n");
+            writer.write("\t\t<foreach item=\"id\" collection=\"list\" open=\"(\" separator=\",\" close=\")\">\n");
+            writer.write("\t\t\t#{id}\n");
+            writer.write("\t\t</foreach>\n");
+            writer.write("\t</delete>\n");
+            writer.write("\n");
+        }
     }
 
     @Override

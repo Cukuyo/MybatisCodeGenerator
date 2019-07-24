@@ -70,6 +70,8 @@ public class ExportDao implements Export, DaoFunction {
         listSelective(table, columnList, writer);
         //选择性count
         countSelective(table, columnList, writer);
+        //根据主键批量删除
+        batchDeleteByPrimaryKeyList(table, columnList, writer);
 
         //结尾
         writer.write("}");
@@ -150,6 +152,15 @@ public class ExportDao implements Export, DaoFunction {
         String param = exportInfo.getPoClassName() + " " + exportInfo.getPoVariableName();
         String[] params = new String[]{param};
         generateFunc(writer, "选择性count", "java.lang.Long", "countSelective", params);
+    }
+
+    @Override
+    public void batchDeleteByPrimaryKeyList(Table table, List<Column> columnList, Writer writer) throws IOException {
+        if (priColumn != null) {
+            String param = "List<" + priColumn.getJdbcType() + "> list";
+            String[] params = new String[]{param};
+            generateFunc(writer, "根据主键批量删除", "java.lang.Integer", "batchDeleteByPrimaryKeyList", params);
+        }
     }
 
     private void generateFunc(Writer writer, String comment,

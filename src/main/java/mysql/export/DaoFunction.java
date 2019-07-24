@@ -62,4 +62,9 @@ public interface DaoFunction {
      */
     void countSelective(Table table, List<Column> columnList, Writer writer) throws IOException;
 
+    /**
+     * 根据主键批量删除
+     */
+    void batchDeleteByPrimaryKeyList(Table table, List<Column> columnList, Writer writer) throws IOException;
+
 }
