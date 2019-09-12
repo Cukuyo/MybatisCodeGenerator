@@ -75,25 +75,25 @@ public class Main {
                 System.out.println(i + "、" + dbNameArr.get(i));
             }
             int dbNameIndex = scanner.nextInt();
+            //由于之前是nextInt，所以缓冲区的换行符还没有用，这里手动读取下
+            //https://blog.csdn.net/smile_Shujie/article/details/8860030810
+            scanner.nextLine();
             String dbName = dbNameArr.get(dbNameIndex);
 
             //2、请选择表
             List<Table> tableList = mysqlDb.getTables(dbName);
-            System.out.println("请选择表:");
+            System.out.println("请选择表（多张表以逗号隔开）:");
             for (int i = 0; i < tableList.size(); i++) {
                 Table table = tableList.get(i);
                 System.out.println(i + "、" + table.getName() + "(" + table.getComment() + ")");
             }
             System.out.println(tableList.size() + "、以上所有表");
-            int tableListIndex = scanner.nextInt();
+            String tableListIndexStr = scanner.nextLine();
 
             //获取生成java文件的包名
             Map<String, String> packageNameMap = new HashMap<>();
             String packageNametemp;
             System.out.println("请输入po层包名，直接回车则使用默认包名:");
-            //由于之前是nextInt，所以缓冲区的换行符还没有用，这里手动读取下
-            //https://blog.csdn.net/smile_Shujie/article/details/8860030810
-            scanner.nextLine();
             packageNametemp = scanner.nextLine();
             if (!StringUtils.isEmpty(packageNametemp)) {
                 packageNameMap.put(ExportInfo.PackageName.PO, packageNametemp);
@@ -115,17 +115,20 @@ public class Main {
             }
 
             //导出选择的表
-            if (tableListIndex == tableList.size()) {
-                for (Table table : tableList) {
+            for (String indexStr : tableListIndexStr.split(",")) {
+                Integer index = Integer.valueOf(indexStr);
+                if (index == tableList.size()) {
+                    for (Table table : tableList) {
+                        List<Column> columnList = mysqlDb.getColumns(dbName, table.getName());
+                        ExportInfo exportInfo = new ExportInfo(table, columnList, packageNameMap);
+                        export(exportInfo);
+                    }
+                } else {
+                    Table table = tableList.get(index);
                     List<Column> columnList = mysqlDb.getColumns(dbName, table.getName());
                     ExportInfo exportInfo = new ExportInfo(table, columnList, packageNameMap);
                     export(exportInfo);
                 }
-            } else {
-                Table table = tableList.get(tableListIndex);
-                List<Column> columnList = mysqlDb.getColumns(dbName, table.getName());
-                ExportInfo exportInfo = new ExportInfo(table, columnList, packageNameMap);
-                export(exportInfo);
             }
         } catch (SQLException e) {
             e.printStackTrace();
