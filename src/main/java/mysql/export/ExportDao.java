@@ -72,6 +72,8 @@ public class ExportDao implements Export, DaoFunction {
         countSelective(table, columnList, writer);
         //根据主键批量删除
         batchDeleteByPrimaryKeyList(table, columnList, writer);
+        //批量插入
+        batchInsert(table, columnList, writer);
 
         //结尾
         writer.write("}");
@@ -163,12 +165,19 @@ public class ExportDao implements Export, DaoFunction {
         }
     }
 
+    @Override
+    public void batchInsert(Table table, List<Column> columnList, Writer writer) throws IOException {
+        String param = "List<" + exportInfo.getPoClassName() + "> list";
+        String[] params = new String[]{param};
+        generateFunc(writer, "批量插入",
+                "java.lang.Integer", "batchInsert", params);
+    }
+
     private void generateFunc(Writer writer, String comment,
                               String returnType, String funcName,
                               String[] params) throws IOException {
         ExportUtils.exportComment(writer, "\t", comment, null);
-        ExportUtils.exportInterfaceFunction(writer, "\t", returnType,
-                funcName, params);
+        ExportUtils.exportInterfaceFunction(writer, "\t", returnType, funcName, params);
         writer.write("\n");
     }
 }

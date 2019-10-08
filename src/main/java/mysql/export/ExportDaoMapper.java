@@ -4,6 +4,7 @@ import mysql.info.Column;
 import mysql.info.Table;
 
 import java.io.*;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -72,6 +73,8 @@ public class ExportDaoMapper implements Export, DaoFunction {
         countSelective(table, columnList, writer);
         //根据主键批量删除
         batchDeleteByPrimaryKeyList(table, columnList, writer);
+        //批量插入
+        batchInsert(table, columnList, writer);
 
         //结尾
         writer.write("</mapper>");
@@ -96,13 +99,35 @@ public class ExportDaoMapper implements Export, DaoFunction {
         if (priColumn != null) {
             writer.write("\t<!--根据主键批量删除-->\n");
             writer.write("\t<delete id=\"batchDeleteByPrimaryKeyList\">\n");
-            writer.write("\t\tdelete from "+table.getName()+" where "+priColumn.getName()+" in\n");
+            writer.write("\t\tdelete from " + table.getName() + " where " + priColumn.getName() + " in\n");
             writer.write("\t\t<foreach item=\"id\" collection=\"list\" open=\"(\" separator=\",\" close=\")\">\n");
             writer.write("\t\t\t#{id}\n");
             writer.write("\t\t</foreach>\n");
             writer.write("\t</delete>\n");
             writer.write("\n");
         }
+    }
+
+    @Override
+    public void batchInsert(Table table, List<Column> columnList, Writer writer) throws IOException {
+        writer.write("\t<!--批量插入-->\n");
+        writer.write("\t<insert id=\"batchInsert\" parameterType=\"java.util.List\">\n");
+        writer.write("\t\tinsert into " + table.getName() + "\n");
+        writer.write("\t\t(<include refid=\"Base_Column_List\"/>)\n");
+        writer.write("\t\tvalues\n");
+        writer.write("\t\t<foreach collection=\"list\" index=\"index\" item=\"item\" separator=\",\">\n");
+        writer.write("\t\t\t");
+        Iterator<Column> iterator = columnList.iterator();
+        while (iterator.hasNext()) {
+            writer.write("#{item." + iterator.next().getJdbcName() + "}");
+            if (iterator.hasNext()) {
+                writer.write(", ");
+            }
+        }
+        writer.write("\n");
+        writer.write("\t\t</foreach>\n");
+        writer.write("\t</insert>\n");
+        writer.write("\n");
     }
 
     @Override

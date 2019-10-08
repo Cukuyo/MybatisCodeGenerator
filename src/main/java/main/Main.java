@@ -116,7 +116,7 @@ public class Main {
 
             //导出选择的表
             for (String indexStr : tableListIndexStr.split(",")) {
-                Integer index = Integer.valueOf(indexStr);
+                int index = Integer.parseInt(indexStr);
                 if (index == tableList.size()) {
                     for (Table table : tableList) {
                         List<Column> columnList = mysqlDb.getColumns(dbName, table.getName());

@@ -76,6 +76,8 @@ public class ExportServiceImpl implements Export, DaoFunction {
         countSelective(table, columnList, writer);
         //根据主键批量删除
         batchDeleteByPrimaryKeyList(table, columnList, writer);
+        //批量插入
+        batchInsert(table, columnList, writer);
 
         //结尾
         writer.write("}");
@@ -173,10 +175,19 @@ public class ExportServiceImpl implements Export, DaoFunction {
         if (priColumn != null) {
             String returnType = "java.lang.Integer";
             String funcName = "batchDeleteByPrimaryKeyList";
-            String[] paramTypeArr = new String[]{ "List<" + priColumn.getJdbcType() + ">"};
+            String[] paramTypeArr = new String[]{"List<" + priColumn.getJdbcType() + ">"};
             String[] paramNameArr = new String[]{"list"};
             generateFunc(writer, "根据主键批量删除", returnType, funcName, paramTypeArr, paramNameArr);
         }
+    }
+
+    @Override
+    public void batchInsert(Table table, List<Column> columnList, Writer writer) throws IOException {
+        String returnType = "java.lang.Integer";
+        String funcName = "batchInsert";
+        String[] paramTypeArr = new String[]{"List<" + exportInfo.getPoClassName() + ">"};
+        String[] paramNameArr = new String[]{"list"};
+        generateFunc(writer, "批量插入", returnType, funcName, paramTypeArr, paramNameArr);
     }
 
     private void generateFunc(Writer writer, String comment,

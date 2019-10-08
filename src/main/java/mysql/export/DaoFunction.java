@@ -67,4 +67,9 @@ public interface DaoFunction {
      */
     void batchDeleteByPrimaryKeyList(Table table, List<Column> columnList, Writer writer) throws IOException;
 
+    /**
+     * 批量插入
+     */
+    void batchInsert(Table table, List<Column> columnList, Writer writer) throws IOException;
+
 }
