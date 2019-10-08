@@ -1,5 +1,7 @@
 package mysql.export;
 
+import mysql.info.ExportInfo;
+
 import java.io.IOException;
 
 /**

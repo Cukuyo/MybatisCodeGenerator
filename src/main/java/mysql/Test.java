@@ -2,6 +2,7 @@ package mysql;
 
 import mysql.export.*;
 import mysql.info.Column;
+import mysql.info.ExportInfo;
 import mysql.info.Table;
 
 import java.io.IOException;

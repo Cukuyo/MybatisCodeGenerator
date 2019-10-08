@@ -1,8 +1,6 @@
-package mysql.export;
+package mysql.info;
 
 import lombok.Data;
-import mysql.info.Column;
-import mysql.info.Table;
 
 import java.io.Serializable;
 import java.util.List;
@@ -19,7 +17,7 @@ import java.util.Map;
 @Data
 public class ExportInfo implements Serializable {
 
-    public static final String CHARSET_NAME="UTF-8";
+    public static final String CHARSET_NAME = "UTF-8";
 
     public static class PackageName {
         public static final String PO = "po";

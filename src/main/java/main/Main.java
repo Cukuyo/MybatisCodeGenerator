@@ -2,7 +2,9 @@ package main;
 
 import mysql.MysqlDb;
 import mysql.export.*;
+import mysql.function.FunctionExportEnum;
 import mysql.info.Column;
+import mysql.info.ExportInfo;
 import mysql.info.Table;
 import mysql.util.StringUtils;
 
@@ -147,6 +149,10 @@ public class Main {
     }
 
     private static void export(ExportInfo exportInfo) throws IOException {
+        FunctionExportEnum[] enums = FunctionExportEnum.values();
+        for (FunctionExportEnum functionExportEnum : enums) {
+            functionExportEnum.getFunctionExport().init(exportInfo);
+        }
         exportPo.export(poExportDir, exportInfo);
         exportDao.export(daoExportDir, exportInfo);
         exportDaoMapper.export(daoMapperExportDir, exportInfo);

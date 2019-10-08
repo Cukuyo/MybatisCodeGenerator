@@ -1,10 +1,11 @@
 package mysql.export;
 
+import mysql.function.FunctionExportEnum;
 import mysql.info.Column;
+import mysql.info.ExportInfo;
 import mysql.info.Table;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -16,7 +17,7 @@ import java.util.ListIterator;
  * @author yao.song
  * @date 2019-07-16 09:26
  **/
-public class ExportDaoMapper implements Export, DaoFunction {
+public class ExportDaoMapper implements Export {
 
     private ExportInfo exportInfo;
     private Table table;
@@ -53,193 +54,18 @@ public class ExportDaoMapper implements Export, DaoFunction {
         baseUpdateSelective(table, columnList, writer);
         //Base_List_Selective
         baseListSelective(table, columnList, writer);
-        //根据主键查询
-        selectByPrimaryKey(table, columnList, writer);
-        //根据主键删除
-        deleteByPrimaryKey(table, columnList, writer);
-        //选择性插入
-        insertSelective(table, columnList, writer);
-        //选择性可忽略的插入
-        insertSelectiveIgnore(table, columnList, writer);
-        //选择性更新
-        updateSelective(table, columnList, writer);
-        //根据主键选择性更新
-        updateSelectiveByPrimaryKey(table, columnList, writer);
-        //选择性删除
-        deleteSelective(table, columnList, writer);
-        //选择性查询列表
-        listSelective(table, columnList, writer);
-        //选择性count
-        countSelective(table, columnList, writer);
-        //根据主键批量删除
-        batchDeleteByPrimaryKeyList(table, columnList, writer);
-        //批量插入
-        batchInsert(table, columnList, writer);
+
+        //导出各函数
+        FunctionExportEnum[] enums = FunctionExportEnum.values();
+        for (FunctionExportEnum functionExportEnum : enums) {
+            functionExportEnum.getFunctionExport().exportDaoMapper("\t", writer, exportInfo);
+            writer.write("\n");
+        }
 
         //结尾
         writer.write("</mapper>");
 
         writer.close();
-    }
-
-    @Override
-    public void countSelective(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性count-->\n");
-        writer.write("\t<select id=\"countSelective\" parameterType=\"" + exportInfo.getPoPackageClassName() + "\" resultType=\"long\">\n");
-        writer.write("\t\tselect count(*) from " + table.getName() + "\n");
-        writer.write("\t\t<where>\n");
-        writer.write("\t\t\t<include refid=\"Base_List_Selective\"/>\n");
-        writer.write("\t\t</where>\n");
-        writer.write("\t</select>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void batchDeleteByPrimaryKeyList(Table table, List<Column> columnList, Writer writer) throws IOException {
-        if (priColumn != null) {
-            writer.write("\t<!--根据主键批量删除-->\n");
-            writer.write("\t<delete id=\"batchDeleteByPrimaryKeyList\">\n");
-            writer.write("\t\tdelete from " + table.getName() + " where " + priColumn.getName() + " in\n");
-            writer.write("\t\t<foreach item=\"id\" collection=\"list\" open=\"(\" separator=\",\" close=\")\">\n");
-            writer.write("\t\t\t#{id}\n");
-            writer.write("\t\t</foreach>\n");
-            writer.write("\t</delete>\n");
-            writer.write("\n");
-        }
-    }
-
-    @Override
-    public void batchInsert(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--批量插入-->\n");
-        writer.write("\t<insert id=\"batchInsert\" parameterType=\"java.util.List\">\n");
-        writer.write("\t\tinsert into " + table.getName() + "\n");
-        writer.write("\t\t(<include refid=\"Base_Column_List\"/>)\n");
-        writer.write("\t\tvalues\n");
-        writer.write("\t\t<foreach collection=\"list\" index=\"index\" item=\"item\" separator=\",\">\n");
-        writer.write("\t\t\t");
-        Iterator<Column> iterator = columnList.iterator();
-        while (iterator.hasNext()) {
-            writer.write("#{item." + iterator.next().getJdbcName() + "}");
-            if (iterator.hasNext()) {
-                writer.write(", ");
-            }
-        }
-        writer.write("\n");
-        writer.write("\t\t</foreach>\n");
-        writer.write("\t</insert>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void listSelective(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性查询列表-->\n");
-        writer.write("\t<select id=\"listSelective\" resultMap=\"BaseResultMap\" parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-        writer.write("\t\tselect\n");
-        writer.write("\t\t<include refid=\"Base_Column_List\"/>\n");
-        writer.write("\t\tfrom  " + table.getName() + "\n");
-        writer.write("\t\t<where>\n");
-        writer.write("\t\t\t<include refid=\"Base_List_Selective\"/>\n");
-        writer.write("\t\t</where>\n");
-        writer.write("\t</select>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void deleteSelective(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性删除-->\n");
-        writer.write("\t<delete id=\"deleteSelective\" parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-        writer.write("\t\tdelete from " + table.getName() + "\n");
-        writer.write("\t\t<where>\n");
-        writer.write("\t\t\t<include refid=\"Base_List_Selective\"/>\n");
-        writer.write("\t\t</where>\n");
-        writer.write("\t</delete>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void updateSelectiveByPrimaryKey(Table table, List<Column> columnList, Writer writer)
-            throws IOException {
-        if (priColumn != null) {
-            writer.write("\t<!--根据主键选择性更新-->\n");
-            writer.write("\t<update id=\"updateSelectiveByPrimaryKey\" parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-            writer.write("\t\tupdate " + table.getName() + "\n");
-            writer.write("\t\t<include refid=\"Base_Update_Selective\"/>\n");
-            writer.write("\t\twhere " + priColumn.getName() + " = #{" + priColumn.getJdbcName() + "}\n");
-            writer.write("\t</update>\n");
-            writer.write("\n");
-        }
-    }
-
-    @Override
-    public void updateSelective(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性更新-->\n");
-        writer.write("\t<update id=\"updateSelective\" parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-        writer.write("\t\tupdate " + table.getName() + "\n");
-        writer.write("\t\t<include refid=\"Base_Update_Selective\"/>\n");
-        writer.write("\t</update>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void insertSelectiveIgnore(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性可忽略的插入-->\n");
-        writer.write("\t<insert id=\"insertSelectiveIgnore\" useGeneratedKeys=\"true\" ");
-        if (priColumn != null) {
-            writer.write("keyProperty=\"" + priColumn.getName() + "\" ");
-        }
-        writer.write("parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-        writer.write("\t\tinsert ignore into " + table.getName() + "\n");
-        writer.write("\t\t<include refid=\"Base_Insert_Selective\"/>\n");
-        writer.write("\t</insert>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void insertSelective(Table table, List<Column> columnList, Writer writer) throws IOException {
-        writer.write("\t<!--选择性插入-->\n");
-        writer.write("\t<insert id=\"insertSelective\" useGeneratedKeys=\"true\" ");
-        if (priColumn != null) {
-            writer.write("keyProperty=\"" + priColumn.getName() + "\" ");
-        }
-        writer.write("parameterType=\"" + exportInfo.getPoPackageClassName() + "\">\n");
-        writer.write("\t\tinsert into " + table.getName() + "\n");
-        writer.write("\t\t<include refid=\"Base_Insert_Selective\"/>\n");
-        writer.write("\t</insert>\n");
-        writer.write("\n");
-    }
-
-    @Override
-    public void deleteByPrimaryKey(Table table, List<Column> columnList, Writer writer) throws IOException {
-        if (priColumn != null) {
-            writer.write("\t<!--根据主键删除-->\n");
-            writer.write("\t<delete id=\"deleteByPrimaryKey\">\n");
-            writer.write("\t\tdelete from " + table.getName() + "\n");
-            writer.write("\t\twhere " + priColumn.getName() + " = #{" + priColumn.getJdbcName() + "}\n");
-            writer.write("\t</delete>\n");
-            writer.write("\n");
-        }
-    }
-
-    @Override
-    public void selectByPrimaryKey(Table table, List<Column> columnList, Writer writer) throws IOException {
-        Column priColumn = null;
-        for (Column column : columnList) {
-            String key = column.getKey();
-            if (key != null && key.equals(Column.KEY_PRIMARY)) {
-                priColumn = column;
-                break;
-            }
-        }
-        if (priColumn != null) {
-            writer.write("\t<!--根据主键查询-->\n");
-            writer.write("\t<select id=\"selectByPrimaryKey\" resultMap=\"BaseResultMap\">\n");
-            writer.write("\t\tselect\n");
-            writer.write("\t\t<include refid=\"Base_Column_List\"/>\n");
-            writer.write("\t\tfrom " + table.getName() + "\n");
-            writer.write("\t\twhere " + priColumn.getName() + " = #{" + priColumn.getJdbcName() + "}\n");
-            writer.write("\t</select>\n");
-            writer.write("\n");
-        }
     }
 
     public void baseListSelective(Table table, List<Column> columnList, Writer writer) throws IOException {

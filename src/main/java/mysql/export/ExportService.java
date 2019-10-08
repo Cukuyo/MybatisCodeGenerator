@@ -1,6 +1,7 @@
 package mysql.export;
 
 import mysql.info.Column;
+import mysql.info.ExportInfo;
 import mysql.info.Table;
 import mysql.util.ExportUtils;
 
