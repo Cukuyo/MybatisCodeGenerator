@@ -11,7 +11,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
-		<mysql-connector-java-version>8.0.17</mysql-connector-java-version>
+		<mysql-connector-java-version>8.0.28</mysql-connector-java-version>
 		<lombok-version>1.18.8</lombok-version>
 	</properties>
 
